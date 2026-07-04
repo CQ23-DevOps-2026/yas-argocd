@@ -2,4 +2,7 @@ backend:
   image:
     tag: 00bd4113
   ingress:
+    enabled: true
     host: api.dev.yas.local.com
+    path: /cart
+    pathType: Prefix
