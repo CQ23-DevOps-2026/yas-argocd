@@ -1,8 +1,0 @@
-backend:
-  image:
-    repository: vinny2707/yas-webhook
-    tag: latest
-
-  nameOverride: webhook
-  fullnameOverride: webhook
-  databaseName: webhook
