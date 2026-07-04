@@ -4,3 +4,4 @@ ingress:
     - host: api.staging.yas.local.com
       paths:
         - path: /swagger-ui
+          pathType: ImplementationSpecific
