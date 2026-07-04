@@ -1,0 +1,15 @@
+global:
+  environment: staging
+
+backend:
+  extraEnvs:
+    - name: SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI
+      value: "http://identity.yas.local.com/realms/Yas"
+    - name: PGSSLMODE
+      value: "disable"
+  livenessProbe:
+    initialDelaySeconds: 120
+    failureThreshold: 30
+  readinessProbe:
+    initialDelaySeconds: 120
+    failureThreshold: 30

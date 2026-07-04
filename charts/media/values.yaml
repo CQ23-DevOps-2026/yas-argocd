@@ -1,0 +1,27 @@
+backend:
+  image:
+    repository: vinny2707/yas-media
+    tag: latest
+
+  nameOverride: media
+  fullnameOverride: media
+  databaseName: media
+  ingress:
+    enabled: false
+  extraVolumes:
+    - name: media-application
+      configMap:
+        name: media-application-configmap
+    - name: media-sample-images
+      hostPath:
+        path: /home/yasadmin/projects/project1/sampledata/images
+        type: Directory
+  extraVolumeMounts:
+    - name: media-application
+      mountPath: /opt/yas/media
+    - name: media-sample-images
+      mountPath: /images
+      readOnly: true
+  extraApplicationConfigPaths:
+    - /opt/yas/media/media-application.yaml
+

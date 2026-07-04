@@ -1,0 +1,11 @@
+apiVersion: v2
+name: api-gateway
+description: Developer API gateway exposed by NodePort
+type: application
+version: 0.1.0
+appVersion: "latest"
+
+dependencies:
+  - name: backend
+    version: 0.1.0
+    repository: file://../backend

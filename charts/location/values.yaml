@@ -1,0 +1,10 @@
+backend:
+  image:
+    repository: vinny2707/yas-location
+    tag: latest
+
+  nameOverride: location
+  fullnameOverride: location
+  databaseName: location
+  ingress:
+    enabled: false
