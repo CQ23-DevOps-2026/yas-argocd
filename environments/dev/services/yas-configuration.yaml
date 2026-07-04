@@ -1,1 +1,8 @@
-{}
+mediaApplicationConfig:
+  yas:
+    publicUrl: http://api.dev.yas.local.com/media
+
+paymentPaypalApplicationConfig:
+  yas:
+    public:
+      url: http://storefront.dev.yas.local.com/complete-payment
