@@ -1,0 +1,6 @@
+ingress:
+  host: api.dev.yas.local.com
+  hosts:
+    - host: api.dev.yas.local.com
+      paths:
+        - path: /swagger-ui

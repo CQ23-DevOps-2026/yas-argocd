@@ -1,0 +1,5 @@
+backend:
+  image:
+    tag: main
+  ingress:
+    host: backoffice.dev.yas.local.com

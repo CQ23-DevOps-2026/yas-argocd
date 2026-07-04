@@ -1,0 +1,5 @@
+backend:
+  image:
+    tag: main
+  ingress:
+    host: api.staging.yas.local.com

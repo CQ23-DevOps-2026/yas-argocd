@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: yas-dev-apps
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - name: yas-configuration
+          - name: backoffice-bff
+          - name: backoffice-ui
+          - name: cart
+          - name: customer
+          - name: inventory
+          - name: location
+          - name: media
+          - name: order
+          - name: payment
+          - name: payment-paypal
+          - name: product
+          - name: promotion
+          - name: rating
+          - name: recommendation
+          - name: sampledata
+          - name: search
+          - name: storefront-bff
+          - name: storefront-ui
+          - name: tax
+          - name: webhook
+          - name: swagger-ui
+  template:
+    metadata:
+      name: 'dev-{{name}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/CQ23-DevOps-2026/yas-argocd.git'
+        targetRevision: HEAD
+        path: 'charts/{{name}}'
+        helm:
+          valueFiles:
+            - '../../environments/dev/services/{{name}}.yaml'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: dev
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

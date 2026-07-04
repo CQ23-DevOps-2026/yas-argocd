@@ -1,0 +1,5 @@
+backend:
+  image:
+    tag: main
+  ingress:
+    host: storefront.dev.yas.local.com
