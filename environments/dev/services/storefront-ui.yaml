@@ -1,6 +1,6 @@
 ui:
   image:
-    tag: 00bd4113
+    tag: 6b696d16
   extraEnvs:
     - name: API_BASE_PATH
       value: http://storefront-bff/api
