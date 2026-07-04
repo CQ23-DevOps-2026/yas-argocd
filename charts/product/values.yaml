@@ -1,7 +1,7 @@
 backend:
   image:
-    repository: ghcr.io/nashtech-garage/yas-product
-    tag: latest
+    repository: vinny2707/yas-product
+    tag: main
 
   nameOverride: product
   fullnameOverride: product
