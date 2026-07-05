@@ -45,3 +45,16 @@ spec:
       app.kubernetes.io/name: swagger-ui
   mtls:
     mode: PERMISSIVE
+---
+# Allow plaintext from Nginx Ingress (outside mesh) to media (for serving product images)
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: media-mtls-override
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  mtls:
+    mode: PERMISSIVE

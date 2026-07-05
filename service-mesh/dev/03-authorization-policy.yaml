@@ -40,7 +40,21 @@ spec:
   rules:
     - {}
 ---
-# 4. Strict product service policy: allow storefront-bff, backoffice-bff, and search
+# 3a. Allow public access from Nginx Ingress to media (to serve product images)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: media-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  action: ALLOW
+  rules:
+    - {}
+---
+# 4. Strict product service policy: allow storefront-bff, backoffice-bff, search, cart, and order
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -58,6 +72,8 @@ spec:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/backoffice-bff"
               - "cluster.local/ns/dev/sa/search"
+              - "cluster.local/ns/dev/sa/cart"
+              - "cluster.local/ns/dev/sa/order"
 ---
 # 5. Strict search service policy: allow storefront-bff (to query search index)
 apiVersion: security.istio.io/v1beta1
