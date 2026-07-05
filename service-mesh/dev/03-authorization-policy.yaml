@@ -164,27 +164,14 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/order"
 ---
-# 11. Allow storefront-bff and backoffice-bff to access all other general backend services
+# 11. Allow storefront-bff and backoffice-bff to access any service in the dev namespace
+# This automatically protects all general services (customer, media, rating, etc.) from unauthorized pods
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: general-backends-access
+  name: bff-to-any-backend
   namespace: dev
 spec:
-  selector:
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - customer
-          - location
-          - media
-          - promotion
-          - rating
-          - recommendation
-          - sampledata
-          - webhook
-          - payment-paypal
   action: ALLOW
   rules:
     - from:
