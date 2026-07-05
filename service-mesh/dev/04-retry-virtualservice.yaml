@@ -11,6 +11,8 @@ spec:
     - route:
         - destination:
             host: cart
+            port:
+              number: 80
       retries:
         attempts: 3
         perTryTimeout: 2s
@@ -29,6 +31,8 @@ spec:
     - route:
         - destination:
             host: payment
+            port:
+              number: 80
       retries:
         attempts: 3
         perTryTimeout: 2s
@@ -47,6 +51,8 @@ spec:
     - route:
         - destination:
             host: inventory
+            port:
+              number: 80
       retries:
         attempts: 3
         perTryTimeout: 2s
@@ -72,10 +78,14 @@ spec:
     #   route:
     #     - destination:
     #         host: tax
+    #         port:
+    #           number: 80
     # -------------------------------------------------------------------------------------
     - route:
         - destination:
             host: tax
+            port:
+              number: 80
       retries:
         attempts: 3
         perTryTimeout: 2s
