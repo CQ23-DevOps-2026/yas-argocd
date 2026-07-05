@@ -216,3 +216,16 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+---
+# 13. Allow Prometheus metrics scraping and Kubernetes probes on port 8090
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: prometheus-and-probes-allow
+  namespace: dev
+spec:
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            ports: ["8090"]

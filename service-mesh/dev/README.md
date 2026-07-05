@@ -9,6 +9,7 @@ This directory contains the Kubernetes manifests to configure Istio Service Mesh
 *   `03-authorization-policy.yaml`: Enforces strict zero-trust access control policies:
     *   Allows public Ingress access to `storefront-bff`, `backoffice-bff`, `dev-swagger-ui`, and `media`.
     *   Allows public access to Swagger API docs (`/v3/api-docs`) of all services.
+    *   Allows Prometheus metrics scraping and Kubernetes probes on port 8090.
     *   `product` service: Allows only `storefront-bff`, `backoffice-bff`, and `search`.
     *   `search` service: Allows only `storefront-bff`.
     *   `cart` service: Allows only `storefront-bff` and `order`.
