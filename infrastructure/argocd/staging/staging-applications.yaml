@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: yas-dev-apps
+  name: yas-staging-apps
   namespace: argocd
 spec:
   generators:
@@ -31,7 +31,7 @@ spec:
           - name: swagger-ui
   template:
     metadata:
-      name: 'dev-{{name}}'
+      name: 'staging-{{name}}'
     spec:
       project: default
       source:
@@ -40,10 +40,10 @@ spec:
         path: 'charts/{{name}}'
         helm:
           valueFiles:
-            - '../../environments/dev/services/{{name}}.yaml'
+            - '../../environments/staging/services/{{name}}.yaml'
       destination:
         server: 'https://kubernetes.default.svc'
-        namespace: dev
+        namespace: staging
       syncPolicy:
         automated:
           prune: true
@@ -54,17 +54,17 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-service-mesh
+  name: yas-staging
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/CQ23-DevOps-2026/yas-argocd.git'
     targetRevision: HEAD
-    path: 'service-mesh/dev'
+    path: 'infrastructure/argocd/staging'
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: dev
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
