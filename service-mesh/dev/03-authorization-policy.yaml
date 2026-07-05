@@ -164,7 +164,7 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/order"
 ---
-# 11. Allow storefront-bff and backoffice-bff to access any service in the dev namespace
+# 11. Allow storefront-bff, backoffice-bff, product, and order to access any service in the dev namespace
 # This automatically protects all general services (customer, media, rating, etc.) from unauthorized pods
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -179,3 +179,5 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/backoffice-bff"
+              - "cluster.local/ns/dev/sa/product"
+              - "cluster.local/ns/dev/sa/order"
