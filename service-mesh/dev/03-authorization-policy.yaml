@@ -180,7 +180,7 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/order"
 ---
-# 11. Allow storefront-bff, backoffice-bff, product, and order to access any service in the dev namespace
+# 11. Allow storefront-bff, backoffice-bff, product, order, storefront-ui, and backoffice-ui to access any service in the dev namespace
 # This automatically protects all general services (customer, media, rating, etc.) from unauthorized pods
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
@@ -197,6 +197,8 @@ spec:
               - "cluster.local/ns/dev/sa/backoffice-bff"
               - "cluster.local/ns/dev/sa/product"
               - "cluster.local/ns/dev/sa/order"
+              - "cluster.local/ns/dev/sa/storefront-ui"
+              - "cluster.local/ns/dev/sa/backoffice-ui"
 ---
 # 12. Allow public access to OpenAPI/Swagger docs of all services so Swagger UI can load them
 apiVersion: security.istio.io/v1beta1
