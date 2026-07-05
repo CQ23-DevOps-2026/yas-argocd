@@ -4,8 +4,7 @@ This directory contains the Kubernetes manifests to configure Istio Service Mesh
 
 ## 1. Configured Manifests
 *   `00-namespace.yaml`: Defines the `dev` namespace with the `istio-injection: enabled` label to automate sidecar injection via GitOps.
-*   `01-mtls.yaml`: Configures the namespace mTLS mode to `PERMISSIVE`. This allows internal microservices to use strict mTLS (via DestinationRule) while letting external Nginx Ingress Controller access endpoints like product images and Swagger API docs via plaintext.
-*   `01a-destination-rule.yaml`: Explicitly configures client-side mTLS (`mode: ISTIO_MUTUAL`) for all services in the `dev` namespace to ensure encrypted service-to-service communication.
+*   `01-mtls.yaml`: Configures the namespace mTLS mode to `PERMISSIVE`. This allows internal microservices to use mTLS while letting the external Nginx Ingress Controller access endpoints like product images and Swagger API docs via plaintext.
 *   `02-test-client.yaml`: Deploys a simple `test-client` Pod running with the `default` service account to act as an unauthorized client.
 *   `03-authorization-policy.yaml`: Enforces strict zero-trust access control policies:
     *   Allows public Ingress access to `storefront-bff`, `backoffice-bff`, `dev-swagger-ui`, and `media`.
