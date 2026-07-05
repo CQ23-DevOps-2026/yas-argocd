@@ -197,3 +197,20 @@ spec:
               - "cluster.local/ns/dev/sa/backoffice-bff"
               - "cluster.local/ns/dev/sa/product"
               - "cluster.local/ns/dev/sa/order"
+---
+# 12. Allow public access to OpenAPI/Swagger docs of all services so Swagger UI can load them
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: public-api-docs
+  namespace: dev
+spec:
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"

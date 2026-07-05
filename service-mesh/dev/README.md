@@ -4,11 +4,12 @@ This directory contains the Kubernetes manifests to configure Istio Service Mesh
 
 ## 1. Configured Manifests
 *   `00-namespace.yaml`: Defines the `dev` namespace with the `istio-injection: enabled` label to automate sidecar injection via GitOps.
-*   `01-mtls.yaml`: Enables strict mTLS (`mode: STRICT`) inside the `dev` namespace, with overrides to `mode: PERMISSIVE` for BFFs and Swagger UI to accept plaintext traffic from the external Nginx Ingress Controller.
-*   `01a-destination-rule.yaml`: Explicitly configures client-side mTLS (`mode: ISTIO_MUTUAL`) for all services in the `dev` namespace.
+*   `01-mtls.yaml`: Configures the namespace mTLS mode to `PERMISSIVE`. This allows internal microservices to use strict mTLS (via DestinationRule) while letting external Nginx Ingress Controller access endpoints like product images and Swagger API docs via plaintext.
+*   `01a-destination-rule.yaml`: Explicitly configures client-side mTLS (`mode: ISTIO_MUTUAL`) for all services in the `dev` namespace to ensure encrypted service-to-service communication.
 *   `02-test-client.yaml`: Deploys a simple `test-client` Pod running with the `default` service account to act as an unauthorized client.
 *   `03-authorization-policy.yaml`: Enforces strict zero-trust access control policies:
-    *   Allows public Ingress access to `storefront-bff`, `backoffice-bff`, and `dev-swagger-ui`.
+    *   Allows public Ingress access to `storefront-bff`, `backoffice-bff`, `dev-swagger-ui`, and `media`.
+    *   Allows public access to Swagger API docs (`/v3/api-docs`) of all services.
     *   `product` service: Allows only `storefront-bff`, `backoffice-bff`, and `search`.
     *   `search` service: Allows only `storefront-bff`.
     *   `cart` service: Allows only `storefront-bff` and `order`.
