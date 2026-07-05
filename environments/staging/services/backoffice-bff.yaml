@@ -1,5 +1,5 @@
 backend:
   image:
-    tag: 6b696d16
+    tag: v1.0.1
   ingress:
     host: backoffice.staging.yas.local.com
