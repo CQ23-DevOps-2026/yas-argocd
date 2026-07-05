@@ -1,0 +1,82 @@
+# Configure auto-retry policy for cart service
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: cart-retry
+  namespace: dev
+spec:
+  hosts:
+    - cart
+  http:
+    - route:
+        - destination:
+            host: cart
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,connect-failure,refused-stream"
+---
+# Configure auto-retry policy for payment service
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: payment-retry
+  namespace: dev
+spec:
+  hosts:
+    - payment
+  http:
+    - route:
+        - destination:
+            host: payment
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,connect-failure,refused-stream"
+---
+# Configure auto-retry policy for inventory service
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: inventory-retry
+  namespace: dev
+spec:
+  hosts:
+    - inventory
+  http:
+    - route:
+        - destination:
+            host: inventory
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,connect-failure,refused-stream"
+---
+# Configure auto-retry policy for tax service
+# Includes an optional Fault Injection block (commented out) to simulate 50% chance of HTTP 500 errors for demo
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: tax-retry
+  namespace: dev
+spec:
+  hosts:
+    - tax
+  http:
+    # --- DEMO FAULT INJECTION (Uncomment this section to simulate 50% HTTP 500 failures) ---
+    # - fault:
+    #     abort:
+    #       httpStatus: 500
+    #       percentage:
+    #         value: 50.0
+    #   route:
+    #     - destination:
+    #         host: tax
+    # -------------------------------------------------------------------------------------
+    - route:
+        - destination:
+            host: tax
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+        retryOn: "5xx,connect-failure,refused-stream"

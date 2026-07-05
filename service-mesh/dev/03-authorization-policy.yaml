@@ -1,0 +1,194 @@
+# 1. Allow public access from Nginx Ingress to storefront-bff
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: storefront-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+# 2. Allow public access from Nginx Ingress to backoffice-bff
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: backoffice-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+# 3. Allow public access from Nginx Ingress to Swagger UI
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: swagger-ui-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: swagger-ui
+  action: ALLOW
+  rules:
+    - {}
+---
+# 4. Strict product service policy: allow storefront-bff, backoffice-bff, and search
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: product-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: product
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+              - "cluster.local/ns/dev/sa/search"
+---
+# 5. Strict search service policy: allow storefront-bff (to query search index)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: search-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+---
+# 6. Strict cart service policy: allow storefront-bff and order (during checkout)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: cart-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/order"
+---
+# 7. Strict order service policy: allow storefront-bff (to place orders) and backoffice-bff
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: order-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 8. Strict payment service policy: allow order (to execute payments)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+---
+# 9. Strict inventory service policy: allow order (to deduct stock) and backoffice-bff
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: inventory-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 10. Strict tax service policy: allow order (to calculate taxes)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: tax-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+---
+# 11. Allow storefront-bff and backoffice-bff to access all other general backend services
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: general-backends-access
+  namespace: dev
+spec:
+  selector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - customer
+          - location
+          - media
+          - promotion
+          - rating
+          - recommendation
+          - sampledata
+          - webhook
+          - payment-paypal
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
