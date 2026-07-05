@@ -16,7 +16,8 @@ This directory contains the Kubernetes manifests to configure Istio Service Mesh
     *   `order` service: Allows only `storefront-bff` and `backoffice-bff`.
     *   `payment`, `inventory`, `tax` services: Allow only `order` (and `backoffice-bff` for inventory).
     *   Other general backend services: Allow only `storefront-bff` and `backoffice-bff`.
-*   `04-retry-virtualservice.yaml`: Configures automatic request retries (3 attempts, 2s timeout) for the `cart`, `payment`, `inventory`, and `tax` services.
+*   `04-retry-virtualservice.yaml`: Configures automatic request retries (3 attempts, 2s timeout) for all 12 services in the namespace.
+*   `05-httpbin.yaml`: Deploys the standard `httpbin` service in the `dev` namespace to serve as a mock HTTP backend for testing fault injection and retries.
 
 ---
 
