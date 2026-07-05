@@ -1,1 +1,8 @@
-{}
+mediaApplicationConfig:
+  yas:
+    publicUrl: http://api.staging.yas.local.com/media
+
+paymentPaypalApplicationConfig:
+  yas:
+    public:
+      url: http://storefront.staging.yas.local.com/complete-payment

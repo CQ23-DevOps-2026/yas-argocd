@@ -1,5 +1,8 @@
 backend:
   image:
-    tag: main
+    tag: 6b696d16
   ingress:
+    enabled: true
     host: api.staging.yas.local.com
+    path: /inventory
+    pathType: Prefix
