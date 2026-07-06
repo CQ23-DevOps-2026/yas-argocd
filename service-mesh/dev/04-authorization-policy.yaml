@@ -17,6 +17,58 @@ spec:
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
+  name: storefront-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: backoffice-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: swagger-ui-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: swagger-ui
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: media-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  action: ALLOW
+  rules:
+    - {}
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
   name: product-access
   namespace: dev
 spec:
