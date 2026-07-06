@@ -236,6 +236,108 @@ spec:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/backoffice-bff"
               - "cluster.local/ns/dev/sa/order"
+---
+# 14a. Location Service: Cho phép BFFs truy xuất thông tin địa điểm
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: location-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: location
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 14b. Rating Service: Cho phép xem và viết đánh giá sản phẩm
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: rating-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rating
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 14c. Recommendation Service: Gợi ý sản phẩm cho người dùng
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: recommendation-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: recommendation
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+---
+# 14d. Payment Paypal Service: Xử lý thanh toán qua Paypal
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-paypal-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment-paypal
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+              - "cluster.local/ns/dev/sa/storefront-bff"
+---
+# 14e. Webhook Service: Nhận callback thanh toán từ cổng ngoài (PayPal, v.v.)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: webhook-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: webhook
+  action: ALLOW
+  rules:
+    - {}
+---
+# 14f. Sampledata Service: Seed dữ liệu mẫu hệ thống
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: sampledata-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sampledata
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/backoffice-bff"
 
 # =====================================================================
 # NHÓM 3: TIỆN ÍCH HỆ THỐNG (SYSTEM WIDE UTILITIES)
