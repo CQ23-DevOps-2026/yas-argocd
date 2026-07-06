@@ -1,3 +1,247 @@
+# =====================================================================
+# NHÓM 1: CÁC DỊCH VỤ MỞ CỔNG CÔNG CỘNG (PUBLIC / INGRESS ACCESSIBLE)
+# =====================================================================
+
+# 1. Cho phép truy cập công cộng vào Storefront BFF
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: storefront-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+# 2. Cho phép truy cập công cộng vào Backoffice BFF
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: backoffice-bff-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-bff
+  action: ALLOW
+  rules:
+    - {}
+---
+# 3. Cho phép truy cập công cộng vào Swagger UI
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: swagger-ui-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: swagger-ui
+  action: ALLOW
+  rules:
+    - {}
+---
+# 4. Cho phép truy cập công cộng vào Media Service (để xem/tải ảnh sản phẩm)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: media-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media
+  action: ALLOW
+  rules:
+    - {}
+---
+# 5. Cho phép truy cập công cộng vào Storefront UI (nếu chạy trong mesh)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: storefront-ui-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: storefront-ui
+  action: ALLOW
+  rules:
+    - {}
+---
+# 6. Cho phép truy cập công cộng vào Backoffice UI (nếu chạy trong mesh)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: backoffice-ui-public
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: backoffice-ui
+  action: ALLOW
+  rules:
+    - {}
+
+# =====================================================================
+# NHÓM 2: PHÂN QUYỀN S2S NGHIÊM NGẶT (STRICT SERVICE-TO-SERVICE)
+# =====================================================================
+
+# 7. Product Service: Nhận yêu cầu từ BFFs, Search, Cart và Order
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: product-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: product
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+              - "cluster.local/ns/dev/sa/search"
+              - "cluster.local/ns/dev/sa/cart"
+              - "cluster.local/ns/dev/sa/order"
+---
+# 8. Search Service: Cho phép người dùng tìm kiếm sản phẩm qua BFF
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: search-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: search
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 9. Cart Service: Cho phép người dùng sửa giỏ hàng và Order lấy thông tin khi checkout
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: cart-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cart
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/order"
+---
+# 10. Order Service: Nhận lệnh tạo đơn từ Storefront BFF và xem đơn từ Backoffice BFF
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: order-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: order
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 11. Payment Service: Chỉ cho phép dịch vụ Order gọi để xử lý thanh toán
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: payment-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: payment
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+---
+# 12. Inventory Service: Cho phép Order trừ kho và Backoffice BFF quản lý kho
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: inventory-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: inventory
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 13. Tax Service: Cho phép Order và Backoffice BFF truy cập
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: tax-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tax
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/order"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+---
+# 14. Customer Service: Cho phép BFFs và Order truy xuất thông tin khách hàng
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: customer-access
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: customer
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/dev/sa/storefront-bff"
+              - "cluster.local/ns/dev/sa/backoffice-bff"
+              - "cluster.local/ns/dev/sa/order"
+
+# =====================================================================
+# NHÓM 3: TIỆN ÍCH HỆ THỐNG (SYSTEM WIDE UTILITIES)
+# =====================================================================
+
+# 15. Cho phép truy cập public vào API Docs của các service
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -14,174 +258,15 @@ spec:
               - "/v3/api-docs/*"
               - "/swagger-ui*"
 ---
+# 16. Cho phép giám sát Prometheus & Health Check hoạt động bình thường trên port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
-  name: storefront-bff-public
+  name: prometheus-and-probes-allow
   namespace: dev
 spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: storefront-bff
   action: ALLOW
   rules:
-    - {}
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: backoffice-bff-public
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: backoffice-bff
-  action: ALLOW
-  rules:
-    - {}
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: swagger-ui-public
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: swagger-ui
-  action: ALLOW
-  rules:
-    - {}
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: media-public
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: media
-  action: ALLOW
-  rules:
-    - {}
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: product-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: product
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/storefront-bff
-              - cluster.local/ns/dev/sa/backoffice-bff
-              - cluster.local/ns/dev/sa/search
-              - cluster.local/ns/dev/sa/cart
-              - cluster.local/ns/dev/sa/order
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: search-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: search
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/storefront-bff
-              - cluster.local/ns/dev/sa/backoffice-bff
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: cart-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: cart
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/storefront-bff
-              - cluster.local/ns/dev/sa/order
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: order-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: order
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/storefront-bff
-              - cluster.local/ns/dev/sa/backoffice-bff
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: payment-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: payment
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/order
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: inventory-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: inventory
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/order
-              - cluster.local/ns/dev/sa/backoffice-bff
----
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: tax-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: tax
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - cluster.local/ns/dev/sa/order
+    - to:
+        - operation:
+            ports: ["8090"]
