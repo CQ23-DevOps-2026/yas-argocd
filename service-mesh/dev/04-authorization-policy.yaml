@@ -86,10 +86,10 @@ spec:
     - {}
 
 # =====================================================================
-# NHÓM 2: PHÂN QUYỀN S2S NGHIÊM NGẶT (KÈM MỞ SWAGGER ĐỘC LẬP)
+# NHÓM 2: PHÂN QUYỀN S2S NGHIÊM NGẶT (KÈM MỞ SWAGGER & PROMETHEUS ĐỘC LẬP)
 # =====================================================================
 
-# 6. Product Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 6. Product Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -118,8 +118,12 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    # Rule mở Prometheus metrics & Health Check
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 7. Search Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 7. Search Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -143,8 +147,11 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 8. Cart Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 8. Cart Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -168,8 +175,11 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 9. Order Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 9. Order Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -193,8 +203,11 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 10. Payment Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 10. Payment Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -217,8 +230,11 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 11. Inventory Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 11. Inventory Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -242,8 +258,11 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
 ---
-# 12. Tax Service: Giới hạn S2S + Mở API Docs cho Swagger UI
+# 12. Tax Service: Giới hạn S2S + Mở API Docs + Mở Prometheus port 8090
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -267,3 +286,6 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
+    - to:
+        - operation:
+            ports: ["8090"]
