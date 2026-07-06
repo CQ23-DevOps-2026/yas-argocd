@@ -49,7 +49,7 @@ applicationConfig:
 
   logging:
     pattern:
-      level: application=${spring.application.name} traceId=%X{traceId:-} spanId=%X{spanId:-} level=%level
+      level: application=${spring.application.name} traceId=%X{trace_id:-} spanId=%X{span_id:-} level=%level
 
   spring:
     lifecycle:
@@ -180,6 +180,13 @@ gatewayRoutesConfig:
                 filters:
                   - RewritePath=/api/(?<segment>.*), /$\{segment}
                   - TokenRelay=
+              - id: payment_api
+                uri: http://payment
+                predicates:
+                  - Path=/api/payment/**
+                filters:
+                  - RewritePath=/api/(?<segment>.*), /$\{segment}
+                  - TokenRelay=
               - id: recommendation_api
                 uri: http://recommendation
                 predicates:
@@ -201,6 +208,100 @@ gatewayRoutesConfig:
                 filters:
                   - RewritePath=/api/(?<segment>.*), /$\{segment}
                   - TokenRelay=
+              - id: product_direct_api
+                uri: http://product
+                predicates:
+                  - Path=/product/**
+                filters:
+                  - TokenRelay=
+              - id: location_direct_api
+                uri: http://location
+                predicates:
+                  - Path=/location/**
+                filters:
+                  - TokenRelay=
+              - id: inventory_direct_api
+                uri: http://inventory
+                predicates:
+                  - Path=/inventory/**
+                filters:
+                  - TokenRelay=
+              - id: cart_direct_api
+                uri: http://cart
+                predicates:
+                  - Path=/cart/**
+                filters:
+                  - TokenRelay=
+              - id: customer_direct_api
+                uri: http://customer
+                predicates:
+                  - Path=/customer/**
+                filters:
+                  - TokenRelay=
+              - id: media_direct_api
+                uri: http://media
+                predicates:
+                  - Path=/media/**
+                filters:
+                  - TokenRelay=
+              - id: rating_direct_api
+                uri: http://rating
+                predicates:
+                  - Path=/rating/**
+                filters:
+                  - TokenRelay=
+              - id: tax_direct_api
+                uri: http://tax
+                predicates:
+                  - Path=/tax/**
+                filters:
+                  - TokenRelay=
+              - id: promotion_direct_api
+                uri: http://promotion
+                predicates:
+                  - Path=/promotion/**
+                filters:
+                  - TokenRelay=
+              - id: search_direct_api
+                uri: http://search
+                predicates:
+                  - Path=/search/**
+                filters:
+                  - TokenRelay=
+              - id: order_direct_api
+                uri: http://order
+                predicates:
+                  - Path=/order/**
+                filters:
+                  - TokenRelay=
+              - id: payment_direct_api
+                uri: http://payment
+                predicates:
+                  - Path=/payment/**
+                filters:
+                  - TokenRelay=
+              - id: recommendation_direct_api
+                uri: http://recommendation
+                predicates:
+                  - Path=/recommendation/**
+                filters:
+                  - TokenRelay=
+              - id: webhook_direct_api
+                uri: http://webhook
+                predicates:
+                  - Path=/webhook/**
+                filters:
+                  - TokenRelay=
+              - id: sampledata_direct_api
+                uri: http://sampledata
+                predicates:
+                  - Path=/sampledata/**
+                filters:
+                  - TokenRelay=
+              - id: swagger_ui
+                uri: http://swagger-ui:8080
+                predicates:
+                  - Path=/swagger-ui/**
               - id: ui
                 uri: ${UI_HOST}
                 predicates:
