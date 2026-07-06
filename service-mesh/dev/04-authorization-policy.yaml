@@ -1,6 +1,22 @@
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
+  name: public-api-docs
+  namespace: dev
+spec:
+  action: ALLOW
+  rules:
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
   name: product-access
   namespace: dev
 spec:

@@ -8,7 +8,7 @@ This directory is intentionally minimal while the service mesh setup is being re
 * `01-mtls.yaml`: Enables namespace-level mTLS in `PERMISSIVE` mode.
 * `02-mtls-strict-demo.yaml`: Enables namespace-level mTLS in `STRICT` mode for demos, while leaving public ingress-facing workloads in `PERMISSIVE` mode.
 * `03-destination-rule.yaml`: Configures `product` client-side traffic to use `ISTIO_MUTUAL`.
-* `04-authorization-policy.yaml`: Adds basic service-to-service allow rules for the core product/search/cart/order/checkout flow.
+* `04-authorization-policy.yaml`: Adds basic service-to-service allow rules for the core product/search/cart/order/checkout flow, plus public OpenAPI docs access for Swagger UI.
 
 ## Manual Apply
 
@@ -68,4 +68,4 @@ kubectl get peerauthentication -n dev
 
 The DestinationRule is included as a small explicit demo for `ISTIO_MUTUAL` traffic to `product`.
 
-The basic AuthorizationPolicy intentionally protects only internal backend services and uses real application service accounts. Public entry services such as `storefront-bff`, `backoffice-bff`, `swagger-ui`, and `media` are left open while ingress behavior is being tested.
+The basic AuthorizationPolicy intentionally protects only internal backend services and uses real application service accounts. Public OpenAPI docs are allowed so Swagger UI can load `/v3/api-docs`. Public entry services such as `storefront-bff`, `backoffice-bff`, `swagger-ui`, and `media` are left open while ingress behavior is being tested.
