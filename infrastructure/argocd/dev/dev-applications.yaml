@@ -54,25 +54,6 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-service-mesh
-  namespace: argocd
-spec:
-  project: default
-  source:
-    repoURL: 'https://github.com/CQ23-DevOps-2026/yas-argocd.git'
-    targetRevision: HEAD
-    path: 'service-mesh/dev'
-  destination:
-    server: 'https://kubernetes.default.svc'
-    namespace: dev
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
   name: yas-dev
   namespace: argocd
 spec:
