@@ -2,7 +2,7 @@
 # NHÓM 1: CÁC DỊCH VỤ MỞ CỔNG CÔNG CỘNG (PUBLIC / INGRESS ACCESSIBLE)
 # =====================================================================
 
-# 1. Cho phép truy cập công cộng vào Storefront BFF
+# 1. Storefront BFF
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -16,7 +16,7 @@ spec:
   rules:
     - {}
 ---
-# 2. Cho phép truy cập công cộng vào Backoffice BFF
+# 2. Backoffice BFF
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -30,7 +30,7 @@ spec:
   rules:
     - {}
 ---
-# 3. Cho phép truy cập công cộng vào Swagger UI
+# 3. Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -44,7 +44,7 @@ spec:
   rules:
     - {}
 ---
-# 4. Cho phép truy cập công cộng vào Media Service (để xem/tải ảnh sản phẩm)
+# 4. Media Service
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -58,7 +58,7 @@ spec:
   rules:
     - {}
 ---
-# 5. Cho phép truy cập công cộng vào Storefront UI (nếu chạy trong mesh)
+# 5. UIs (Storefront UI & Backoffice UI)
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -72,7 +72,6 @@ spec:
   rules:
     - {}
 ---
-# 6. Cho phép truy cập công cộng vào Backoffice UI (nếu chạy trong mesh)
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -87,10 +86,10 @@ spec:
     - {}
 
 # =====================================================================
-# NHÓM 2: PHÂN QUYỀN S2S NGHIÊM NGẶT (STRICT SERVICE-TO-SERVICE)
+# NHÓM 2: PHÂN QUYỀN S2S NGHIÊM NGẶT (KÈM MỞ SWAGGER ĐỘC LẬP)
 # =====================================================================
 
-# 7. Product Service: Nhận yêu cầu từ BFFs, Search, Cart và Order
+# 6. Product Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -102,6 +101,7 @@ spec:
       app.kubernetes.io/name: product
   action: ALLOW
   rules:
+    # Rule S2S nghiêm ngặt
     - from:
         - source:
             principals:
@@ -110,8 +110,16 @@ spec:
               - "cluster.local/ns/dev/sa/search"
               - "cluster.local/ns/dev/sa/cart"
               - "cluster.local/ns/dev/sa/order"
+    # Rule mở tài liệu API
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 8. Search Service: Cho phép người dùng tìm kiếm sản phẩm qua BFF
+# 7. Search Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -128,8 +136,15 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/backoffice-bff"
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 9. Cart Service: Cho phép người dùng sửa giỏ hàng và Order lấy thông tin khi checkout
+# 8. Cart Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -146,8 +161,15 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/order"
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 10. Order Service: Nhận lệnh tạo đơn từ Storefront BFF và xem đơn từ Backoffice BFF
+# 9. Order Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -164,8 +186,15 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/storefront-bff"
               - "cluster.local/ns/dev/sa/backoffice-bff"
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 11. Payment Service: Chỉ cho phép dịch vụ Order gọi để xử lý thanh toán
+# 10. Payment Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -181,8 +210,15 @@ spec:
         - source:
             principals:
               - "cluster.local/ns/dev/sa/order"
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 12. Inventory Service: Cho phép Order trừ kho và Backoffice BFF quản lý kho
+# 11. Inventory Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -199,8 +235,15 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/order"
               - "cluster.local/ns/dev/sa/backoffice-bff"
+    - to:
+        - operation:
+            paths:
+              - "*/v3/api-docs"
+              - "/v3/api-docs"
+              - "/v3/api-docs/*"
+              - "/swagger-ui*"
 ---
-# 13. Tax Service: Cho phép Order và Backoffice BFF truy cập
+# 12. Tax Service: Giới hạn S2S + Mở API Docs cho Swagger UI
 apiVersion: security.istio.io/v1beta1
 kind: AuthorizationPolicy
 metadata:
@@ -217,141 +260,6 @@ spec:
             principals:
               - "cluster.local/ns/dev/sa/order"
               - "cluster.local/ns/dev/sa/backoffice-bff"
----
-# 14. Customer Service: Cho phép BFFs và Order truy xuất thông tin khách hàng
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: customer-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: customer
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/storefront-bff"
-              - "cluster.local/ns/dev/sa/backoffice-bff"
-              - "cluster.local/ns/dev/sa/order"
----
-# 14a. Location Service: Cho phép BFFs truy xuất thông tin địa điểm
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: location-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: location
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/storefront-bff"
-              - "cluster.local/ns/dev/sa/backoffice-bff"
----
-# 14b. Rating Service: Cho phép xem và viết đánh giá sản phẩm
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: rating-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: rating
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/storefront-bff"
-              - "cluster.local/ns/dev/sa/backoffice-bff"
----
-# 14c. Recommendation Service: Gợi ý sản phẩm cho người dùng
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: recommendation-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: recommendation
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/storefront-bff"
----
-# 14d. Payment Paypal Service: Xử lý thanh toán qua Paypal
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: payment-paypal-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: payment-paypal
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/order"
-              - "cluster.local/ns/dev/sa/storefront-bff"
----
-# 14e. Webhook Service: Nhận callback thanh toán từ cổng ngoài (PayPal, v.v.)
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: webhook-public
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: webhook
-  action: ALLOW
-  rules:
-    - {}
----
-# 14f. Sampledata Service: Seed dữ liệu mẫu hệ thống
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: sampledata-access
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app.kubernetes.io/name: sampledata
-  action: ALLOW
-  rules:
-    - from:
-        - source:
-            principals:
-              - "cluster.local/ns/dev/sa/backoffice-bff"
-
-# =====================================================================
-# NHÓM 3: TIỆN ÍCH HỆ THỐNG (SYSTEM WIDE UTILITIES)
-# =====================================================================
-
-# 15. Cho phép truy cập public vào API Docs của các service
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: public-api-docs
-  namespace: dev
-spec:
-  action: ALLOW
-  rules:
     - to:
         - operation:
             paths:
@@ -359,16 +267,3 @@ spec:
               - "/v3/api-docs"
               - "/v3/api-docs/*"
               - "/swagger-ui*"
----
-# 16. Cho phép giám sát Prometheus & Health Check hoạt động bình thường trên port 8090
-apiVersion: security.istio.io/v1beta1
-kind: AuthorizationPolicy
-metadata:
-  name: prometheus-and-probes-allow
-  namespace: dev
-spec:
-  action: ALLOW
-  rules:
-    - to:
-        - operation:
-            ports: ["8090"]
