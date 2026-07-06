@@ -1,83 +1,53 @@
-# Istio Service Mesh Configuration & Testing Guide - Dev Environment
+# Istio Service Mesh - Dev
 
-This directory contains the Kubernetes manifests to configure Istio Service Mesh features for the YAS application in the `dev` namespace.
+This directory is intentionally minimal while the service mesh setup is being rebuilt manually.
 
-## 1. Configured Manifests
-*   `00-namespace.yaml`: Defines the `dev` namespace with the `istio-injection: enabled` label to automate sidecar injection via GitOps.
-*   `01-mtls.yaml`: Configures the namespace mTLS mode to `PERMISSIVE`. This allows internal microservices to use mTLS while letting the external Nginx Ingress Controller access endpoints like product images and Swagger API docs via plaintext.
-*   `02-test-client.yaml`: Deploys a simple `test-client` Pod running with the `default` service account to act as an unauthorized client.
-*   `03-authorization-policy.yaml`: Enforces strict zero-trust access control policies:
-    *   Allows public Ingress access to `storefront-bff`, `backoffice-bff`, `dev-swagger-ui`, and `media`.
-    *   Allows public access to Swagger API docs (`/v3/api-docs`) of all services.
-    *   Allows Prometheus metrics scraping and Kubernetes probes on port 8090.
-    *   `product` service: Allows only `storefront-bff`, `backoffice-bff`, and `search`.
-    *   `search` service: Allows only `storefront-bff`.
-    *   `cart` service: Allows only `storefront-bff` and `order`.
-    *   `order` service: Allows only `storefront-bff` and `backoffice-bff`.
-    *   `payment`, `inventory`, `tax` services: Allow only `order` (and `backoffice-bff` for inventory).
-    *   Other general backend services: Allow only `storefront-bff` and `backoffice-bff`.
-*   `04-retry-virtualservice.yaml`: Configures automatic request retries (3 attempts, 2s timeout) for all 12 services in the namespace.
-*   `05-httpbin.yaml`: Deploys the standard `httpbin` service in the `dev` namespace to serve as a mock HTTP backend for testing fault injection and retries.
+## Current Scope
 
----
+* `00-namespace.yaml`: Ensures the `dev` namespace has `istio-injection: enabled`.
+* `01-mtls.yaml`: Enables namespace-level mTLS in `PERMISSIVE` mode.
+* `02-mtls-strict-demo.yaml`: Enables namespace-level mTLS in `STRICT` mode for demos, while leaving public ingress-facing workloads in `PERMISSIVE` mode.
 
-## 2. Deploying via Argo CD
-Since these manifests are registered in `dev-applications.yaml`, Argo CD will automatically sync this folder.
+## Manual Apply
 
-To manually trigger a rollout restart on the VPS to ensure sidecars are injected:
+Apply the namespace label first:
+
+```bash
+kubectl apply -f service-mesh/dev/00-namespace.yaml
+```
+
+Apply the baseline mTLS policy:
+
+```bash
+kubectl apply -f service-mesh/dev/01-mtls.yaml
+```
+
+For a STRICT mTLS demo, apply:
+
+```bash
+kubectl apply -f service-mesh/dev/02-mtls-strict-demo.yaml
+```
+
+Restart workloads after enabling injection or changing sidecar-related behavior:
+
 ```bash
 kubectl rollout restart deployment -n dev
 ```
 
----
+## Verification
 
-## 3. Testing Scenarios (Demo Script)
+Check that the namespace still has sidecar injection enabled:
 
-### Scenario A: Zero-Trust Authorization Policy (Access Control)
+```bash
+kubectl get ns dev --show-labels
+```
 
-1.  **Test 1 (Authorized dependency - ALLOW):**
-    Verify that the `search` service is allowed to communicate with `product` service:
-    ```bash
-    kubectl exec -n dev deploy/search -c search -- curl -s -o /dev/null -w "%{http_code}\n" http://product:80/actuator/health
-    ```
-    *Expected output:* **`200`** (or relevant app HTTP code).
+Check the active mTLS policy:
 
-2.  **Test 2 (Unauthorized - DENY):**
-    Verify that the `test-client` (using the `default` service account) is blocked from calling the `product` service:
-    ```bash
-    kubectl exec -n dev test-client -- curl -ivs http://product:80/actuator/health
-    ```
-    *Expected output:* **`HTTP 403 Forbidden`** with response `RBAC: access denied` from Envoy.
+```bash
+kubectl get peerauthentication -n dev
+```
 
-3.  **Test 3 (Strict isolation - DENY):**
-    Verify that `search` service is blocked from calling `cart` service (since `cart` only allows `storefront-bff` and `order`):
-    ```bash
-    kubectl exec -n dev deploy/search -c search -- curl -ivs http://cart:80/actuator/health
-    ```
-    *Expected output:* **`HTTP 403 Forbidden`** (RBAC: access denied).
+`PERMISSIVE` is the baseline mode for normal development because it allows mesh workloads to use mTLS while keeping plaintext callers such as Nginx Ingress working during the rebuild.
 
----
-
-### Scenario B: Observe mTLS and Topology in Kiali
-1.  Access Kiali Dashboard via NodePort or Port-forwarding.
-2.  Interact with the YAS web storefront to generate traffic.
-3.  Go to Kiali **Graph**, choose **`dev`** namespace:
-    *   Verify the flow: `storefront-bff` -> `product`/`cart`/`search` and `order` -> `tax`/`payment`/`inventory`.
-    *   Verify that each connecting line displays a **Padlock icon** (mTLS STRICT).
-
----
-
-### Scenario C: Test Auto-Retry Policy via Fault Injection
-We can simulate HTTP 500 errors on the `tax` service to demonstrate that Istio automatically retries and masks transient errors:
-
-1.  Open `04-retry-virtualservice.yaml` and **uncomment** the `DEMO FAULT INJECTION` section for the `tax` service.
-2.  Apply the change (or let Argo CD sync it).
-3.  Check the Envoy logs of the `order` pod or run a curl query from `order` to `tax`:
-    ```bash
-    kubectl exec -n dev deploy/order -c order -- curl -ivs http://tax:80/actuator/health
-    ```
-    *   Even though `tax` is throwing 500 errors 50% of the time, the request will succeed most of the time because Envoy automatically retries up to 3 times behind the scenes!
-    *   You can verify the retries in the Envoy sidecar logs:
-        ```bash
-        kubectl logs -n dev deploy/order -c istio-proxy --tail=100
-        ```
+`STRICT` is useful for the demo because plaintext calls to internal mesh workloads are rejected. A `DestinationRule` is not required at this step when Istio auto mTLS is enabled and both source and destination workloads have sidecars.
